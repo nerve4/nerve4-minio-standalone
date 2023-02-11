@@ -1,0 +1,10 @@
+---
+# main.yml for nerve4-minio-standalone
+
+- include: ubuntu-install-minio.yml
+  when: 
+    - ansible_distribution == "Ubuntu"
+
+- include: ubuntu-setup-minio.yml
+  when: 
+    - ansible_distribution == "Ubuntu"

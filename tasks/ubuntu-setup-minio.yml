@@ -1,0 +1,80 @@
+---
+# ubuntu-setup-minio.yml for nerve4-minio-standalone
+
+- name: Ensure group "minio_group" exists
+  ansible.builtin.group:
+    name: "{{ minio_group }}"
+    system: true
+    state: present
+
+- name: Cretae  'minio_user' with a bash shell
+  ansible.builtin.user:
+    name: "{{ minio_user }}"
+    shell: /bin/bash
+    groups: "{{ minio_group }}"
+    system: true
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ minio_store }}"
+    state: directory
+    owner: "{{ minio_user }}"
+    group: "{{ minio_group }}"
+    mode: 0755
+
+- name: Template a file to /etc/default/minio
+  ansible.builtin.template:
+    src: minio.j2
+    dest: /etc/default/minio
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Allow minio port and enable UFW
+  community.general.ufw:
+    state: enabled
+    rule: allow
+    port: "{{ mini_port }}"
+    proto: tcp
+
+- name: Allow ssh port with limitation
+  community.general.ufw:
+    rule: limit
+    port: ssh
+    proto: tcp
+
+- name: Generate a certificate
+  become: yes
+  become_user: "{{ minio_user }}"
+  become_method: sudo
+  ansible.builtin.shell: |
+    certgen -host {{ cert_domain }},{{ server_ip }}
+  args:
+    chdir: $HOME
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ minio_cert_dir }}"
+    state: directory
+    owner: "{{ minio_user }}"
+    group: "{{ minio_group }}"
+    mode: 0755
+
+- name: Generate a certificate
+  become: yes
+  become_user: "{{ minio_user }}"
+  become_method: sudo
+  ansible.builtin.shell: |
+    mv {{ item }} {{ minio_cert_dir }}
+  args:
+    chdir: $HOME
+  with_items:
+    - private.key
+    - public.crt
+
+- name: Enable service minio, and restart it
+  ansible.builtin.service:
+    name: minio
+    enabled: yes
+  notify:
+    - Restart minio
