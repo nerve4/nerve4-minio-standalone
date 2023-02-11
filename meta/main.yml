@@ -1,0 +1,21 @@
+---
+dependencies: []
+
+galaxy_info:
+  author: nerve4 - Lee
+  description: Install minio to Ubuntu Servers
+  license: "license (BSD, MIT)"
+  min_ansible_version: 2.4
+  platforms:
+    - name: Ubuntu
+      versions:
+        - 18
+        - 20
+        - 22
+  galaxy_tags:
+    - minio
+    - storage
+    - s3
+    - object-storage
+
+allow_duplicates: true

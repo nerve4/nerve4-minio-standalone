@@ -1,0 +1,24 @@
+---
+# ubuntu-install-minio.yml for nerve4-minio-standalone
+
+- name: Download minio .deb pkg to local folder
+  ansible.builtin.get_url:
+    url: "{{ minio_url }}"
+    dest: /tmp/minio.deb
+    checksum: "{{ minio_checksum }}"
+
+- name: Install a minio.deb package
+  become: true
+  ansible.builtin.apt:
+    deb: /tmp/minio.deb
+
+- name: Download minio-certgen .deb pkg to local folder
+  ansible.builtin.get_url:
+    url: "{{ minio_certgen_url }}"
+    dest: /tmp/certgen.deb
+    checksum: "{{ minio_certgen_checksum }}"
+
+- name: Install a certgen.deb package
+  become: true
+  ansible.builtin.apt:
+    deb: /tmp/certgen.deb
